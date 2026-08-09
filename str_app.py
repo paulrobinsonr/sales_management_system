@@ -99,7 +99,7 @@ if st.session_state.logged_in:
     conn = get_connection()
     cursor = conn.cursor()
 
-query = """ SELECT 
+    query = """ SELECT 
            SUM(gross_sales),
            SUM(received_amount),
            SUM(pending_amount) 
@@ -107,21 +107,21 @@ query = """ SELECT
         WHERE 1=1
          """
 
-params = []
+    params = []
 
 
 # ---------------- Branch Filter ----------------
 
-if st.session_state.role == "Admin":
+    if st.session_state.role == "Admin":
 
     # Admin can see only their own branch
      query +=" AND branch_id = %s"
      params.append(st.session_state.branch_id)
 
-elif branch != "ALL":
+    elif branch != "ALL":
 
     # Super Admin can select any branch
-    query +=""" AND branch_id = (
+     query +=""" AND branch_id = (
               SELECT branch_id 
               FROM branches
               WHERE branch_name = %s
@@ -133,22 +133,22 @@ elif branch != "ALL":
 
 # ---------------- Product Filter ----------------
 
-if product != "ALL":
-    query += " AND product_name = %s"
-    params.append(product)
+    if product != "ALL":
+     query += " AND product_name = %s"
+     params.append(product)
 
 
 # ---------------- Date Filter ----------------
-query += " AND date BETWEEN %s AND %s"
+    query += " AND date BETWEEN %s AND %s"
 
-params.append(from_date)
-params.append(to_date)
+    params.append(from_date)
+    params.append(to_date)
 
 
 # Execute query
-cursor.execute(query, params)
+    cursor.execute(query, params)
 
-result = cursor.fetchone()
+    result = cursor.fetchone()
 
 
 # ---------------- KPI Values ----------------
