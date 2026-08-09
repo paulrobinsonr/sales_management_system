@@ -1,3 +1,6 @@
+from typing import Any
+
+from mysql.connector.abstracts import MySQLCursorAbstract
 import streamlit as st
 import pandas as pd
 from database_local import get_connection
@@ -57,101 +60,157 @@ if st.session_state.logged_in:
     st.title('📊 Dashboard and Reports')   
     st.caption(f'Welcome back,{st.session_state.username}')
     st.divider()
-    st.subheader('🔍 Filter Controls')
-    col1, col2, col3, col4, col5 = st.columns(5)
-
-    with col1:
-            if st.session_state.role=='Super Admin':
-                       branch= st.selectbox("Branch", options=['ALL', 'Chennai', 'Madurai', 'Trichy', 'Kovai', 'Theni'])
-            else:
-                 branch=branch_name
-                 st.text_input           
-    with col2:
-            product= st.selectbox("Product",options=['ALL','DATA Analysis','Python','Machine Learning','AI','Data Science'])
-    with col3:
-         from_date= st.date_input('From Date')
-    with col4:
-         to_date= st.date_input('To Date')   
-    with col5:
-         st.write('')
-         st.write('')
-         apply_filter=st.button('Apply') 
-##------Stacts--------
+    st.subheader('🔍 Filter Options')
     conn=get_connection()
-    cursor=conn.cursor()
-    query="""SELECT SUM(gross_sales),SUM(received_amount),
-    SUM(gross_sales-received_amount) FROM customer_sales WHERE 1=1"""
-    params=[]
-    if branch!='ALL':
-         query +=" AND branch_id=(SELECT branch_id FROM branches WHERE branch_name=%s)"
-         params.append(branch.lower())
+    cursor=conn.cursor()        
+    cursor.execute("""SELECT branch_id, branch_name FROM branches ORDER BY branch_name""")
+    branch_data=cursor.fetchall()
 
-    if product !="ALL":
-         query +=" AND product_name=%s"
-         params.append(product) 
+    cursor.execute("""SELECT DISTINCT product_name FROM customer_sales ORDER BY product_name""")
+    product_data=cursor.fetchall()
 
-    query +=" AND date BETWEEN %s AND %s"
-    params.append(from_date)
-    params.append(to_date) 
-
-    st.write(query)
-    st.write(params)    
-
-    cursor.execute(query,params)    
-    result=cursor.fetchone()
-
-    gross_sales=result[0] or 0
-    received_amount=result[1] or 0
-    pending_amount=result[2] or 0
-    if gross_sales>0:
-        collection_percentage=(received_amount/gross_sales)*100
-    else:
-        collection_percentage=0
     cursor.close()
-    conn.close()                
+    conn.close()
+
+    if st.session_state.role=='Super Admin':
+        branch_options=['ALL']+[row[1] for row in branch_data]
+    else:
+        admin_branch = next((row[1] for row in branch_data if row[0] == st.session_state.branch_id), None)
+        branch_options=[admin_branch] 
+
+
+    product_option=['ALL']+[row[0] for row in product_data]
+
+    col1, col2, col3, col4, col5 = st.columns(5)
+    with col1:
+        branch = st.selectbox('Select Branch', options=branch_options)
+    with col2:          
+        product = st.selectbox('Select Product', options=product_option)
+    with col3:
+        from_date = st.date_input('From Date')        
+    with col4:
+        to_date = st.date_input('To Date')  
+    with col5:
+        st.write("")
+        st.write("")
+        apply_filter = st.button('Apply Filter',use_container_width=True)            
+
+    ##------Stacts--------
+    conn = get_connection()
+    cursor = conn.cursor()
+
+query = """ SELECT 
+           SUM(gross_sales),
+           SUM(received_amount),
+           SUM(pending_amount) 
+        FROM customer_sales 
+        WHERE 1=1
+         """
+
+params = []
+
+
+# ---------------- Branch Filter ----------------
+
+if st.session_state.role == "Admin":
+
+    # Admin can see only their own branch
+     query +=" AND branch_id = %s"
+     params.append(st.session_state.branch_id)
+
+elif branch != "ALL":
+
+    # Super Admin can select any branch
+    query +=""" AND branch_id = (
+              SELECT branch_id 
+              FROM branches
+              WHERE branch_name = %s
+              ) 
+    """
+
+    params.append(branch)
+
+
+# ---------------- Product Filter ----------------
+
+if product != "ALL":
+    query += " AND product_name = %s"
+    params.append(product)
+
+
+# ---------------- Date Filter ----------------
+query += " AND date BETWEEN %s AND %s"
+
+params.append(from_date)
+params.append(to_date)
+
+
+# Execute query
+cursor.execute(query, params)
+
+result = cursor.fetchone()
+
+
+# ---------------- KPI Values ----------------
+
+gross_sales = result[0] or 0
+received_amount = result[1] or 0
+pending_amount = result[2] or 0
+
+
+if gross_sales > 0:
+     collection_percentage = (
+        received_amount / gross_sales
+     ) * 100
+else:
+    collection_percentage = 0
+
+
+cursor.close()
+conn.close()               
 ##------------Financial Summary----------------
-    st.divider()
-    st.subheader('💰 Financial Summary')
-    card1, card2, card3, card4 = st.columns(4)
-    with card1:
+st.divider()
+st.subheader('💰 Financial Summary')
+card1, card2, card3, card4 = st.columns(4)
+with card1:
          st.metric(label='Gross Sales',value=f'₹{gross_sales:,.0f}')  
-    with card2:
+with card2:
          st.metric(label='Received Amount',value=f'₹{received_amount:,.0f}')
-    with card3:   
+with card3:   
          st.metric(label='Pending Amount',value=f'₹{pending_amount:,.0f}')
-    with card4:
+with card4:
          st.metric(label='Collection %',value=f'{collection_percentage:.2f}%')  
 
-    st.divider()
-    st.subheader('📈 Customer Sales')
+st.divider()
+st.subheader('📈 Customer Sales')
 
-    conn=get_connection()
-    cursor=conn.cursor()
-    if st.session_state.role=='Super Admin':
+conn=get_connection()
+cursor: MySQLCursorAbstract | Any=conn.cursor()
+if st.session_state.role=='Super Admin':
          query="""SELECT sale_id,branch_id,date,name,mobile_number,product_name,gross_sales,
          received_amount,status FROM customer_sales"""
          cursor.execute(query)
-    else:
+else:
          query="""SELECT sale_id,branch_id,date,name,mobile_number,product_name,gross_sales,
          received_amount,status FROM customer_sales WHERE branch_id=%s"""
          cursor.execute(query,(st.session_state.branch_id,))
 
-    sales=cursor.fetchall()
-    column_names=['Sale ID','Branch ID','Date','Customer Name','Mobile Number',
+sales=cursor.fetchall()
+column_names=['Sale ID','Branch ID','Date','Customer Name','Mobile Number',
                   'Product Name','Gross Sales','Received Amount','Status']
 
-    df=pd.DataFrame(sales,columns=column_names)
-    st.dataframe(df,use_container_width=True, 
+df=pd.DataFrame(sales,columns=column_names)
+st.dataframe(df,use_container_width=True, 
     hide_index=True )
-    cursor.close()
-    conn.close()
+cursor.close()
+conn.close()
 
                                              
     
 
 
 
-    st.stop()         
+st.stop()         
         
 
 
