@@ -208,27 +208,27 @@ product_options = ["ALL"] + [row[0] for row in product_data]
 # ============================================================
 # FILTER CONTROLS
 # ============================================================
+with st.form("filter_form"):
+    col1, col2, col3, col4, col5 = st.columns(5)
 
-col1, col2, col3, col4, col5 = st.columns(5)
+    with col1:
+      branch = st.selectbox("Select Branch", options=branch_options)
 
-with col1:
-    branch = st.selectbox("Select Branch", options=branch_options)
+    with col2:
+      product = st.selectbox("Select Product", options=product_options)
 
-with col2:
-    product = st.selectbox("Select Product", options=product_options)
+    with col3:
+      from_date = st.date_input("From Date")
 
-with col3:
-    from_date = st.date_input("From Date")
+    with col4:
+      to_date = st.date_input("To Date")
 
-with col4:
-    to_date = st.date_input("To Date")
-
-with col5:
-    st.write("")
-    st.write("")
-    apply_filter = st.button(
-        "Apply Filter",
-        use_container_width=True
+    with col5:
+      st.write("")
+      st.write("")
+      apply_filter = st.form_submit_button(
+          "Apply Filter",
+          use_container_width=True
     )
 
 
@@ -350,6 +350,7 @@ if st.session_state.role == "Super Admin":
             received_amount,
             status
         FROM customer_sales
+        WHERE 1=1
     """
 
     cursor.execute(query)
