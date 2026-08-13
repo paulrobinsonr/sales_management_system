@@ -6,9 +6,9 @@ from database_local import get_connection
 
 def show_dashboard():
 
-    # ============================================================
-    # MAIN DASHBOARD
-    # ============================================================
+   
+# MAIN DASHBOARD
+    
 
     st.title("📊 Sales Dashboard and Reports")
     st.caption(f"Welcome back, {st.session_state.username}")
@@ -16,9 +16,9 @@ def show_dashboard():
 
     st.subheader("🔍 Filter Options")
 
-    # ============================================================
-    # LOAD FILTER OPTIONS
-    # ============================================================
+    
+# LOAD FILTER OPTIONS
+    
 
     conn = get_connection()
     cursor = conn.cursor()
@@ -40,9 +40,9 @@ def show_dashboard():
     cursor.close()
     conn.close()
 
-    # ============================================================
-    # BRANCH / PRODUCT OPTIONS
-    # ============================================================
+   
+# BRANCH / PRODUCT OPTIONS
+    
 
     if st.session_state.role == "Super Admin":
 
@@ -71,9 +71,9 @@ def show_dashboard():
         row[0] for row in product_data
     ]
 
-    # ============================================================
-    # DEFAULT APPLIED FILTERS
-    # ============================================================
+    
+# DEFAULT APPLIED FILTERS
+   
 
     if "dashboard_filters" not in st.session_state:
 
@@ -101,9 +101,9 @@ def show_dashboard():
 
         st.session_state.dashboard_filters["branch"] = admin_branch
 
-    # ============================================================
-    # FILTER CONTROLS
-    # ============================================================
+   
+# FILTER CONTROLS
+    
 
     with st.form("filter_form"):
 
@@ -163,9 +163,9 @@ def show_dashboard():
                 use_container_width=True
             )
 
-    # ============================================================
-    # APPLY FILTER
-    # ============================================================
+   
+# APPLY FILTER
+    
 
     if apply_filter:
 
