@@ -3,6 +3,22 @@ import pandas as pd
 from datetime import date
 from database_local import get_connection
 
+st.markdown(
+    """
+    <style>
+    section.main > div {
+      max-width: 1200px !important;
+      padding-left: 2rem !important;
+      padding-right: 2rem !important;
+      margin-left: auto !important;
+      margin-rignt: auto !important:
+      
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 
 def show_dashboard():
 

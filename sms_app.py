@@ -32,7 +32,7 @@ if 'branch_name' not in st.session_state:
 st.set_page_config(
     page_title="Sales Management System",
     page_icon="📒",
-    layout="centered"
+    layout="wide"
 )
 
 
@@ -59,7 +59,55 @@ st.markdown(
 # ============================================================
 # LOGIN PAGE
 # ============================================================
+# left_space,login_area,right_space =st.columns([1.5,2,1.5])
+# with login_area:
+#     st.markdown (
+#         "<div style='height: 80px;'></div>",
+#         unsafe_allow_html=True
+#     )
+#     st.markdown(
+#         """
+#         <h1 style="
+#              text-align:center;
+#              color:white;
+#              font-size:42px;
+#              margin-bottom:10px;
+#         ">
+#              📒 Sales Management System
+#         </h1>
+#         """,
+#         unsafe_allow_html=True
+#     )
+#     st.markdown(
+#         """
+#         <h3 style="
+#             text-align:center;
+#             color:white;
+#             margin-bottom:35px;
+#         ">
+#             Please Login To Continue 🔐
+#         </h3>
+#         """,
+#         unsafe_allow_html=True
+#     )
+#     username =st.text_input(
+#         'Username',
+#         key='login_username'
+#     )
+#     password =st.text_input(
+#         'password',
+#         type='password',
+#         key='login_password'
+#     )
 
+#     button_left, button_center, button_right =st.columns([1,1,1])
+
+#     with button_center:
+#         login=st.button(
+#             'Login',
+#             use_container_width=True
+#         )
+    #---------------------------------------------------    
 if not st.session_state.logged_in:
 
     st.title("📒 Sales Management System")
