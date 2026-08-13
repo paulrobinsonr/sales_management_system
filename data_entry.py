@@ -8,7 +8,7 @@ def show_data_entry():
     st.title("📋 Data Entry Workspace")
     st.caption(
         f"Logged in as {st.session_state.username} "
-        f"({st.session_state.role})"
+        f"({st.session_state.branch_admin_name})"
     )
 
     # ============================================================

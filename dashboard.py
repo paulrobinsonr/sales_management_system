@@ -11,7 +11,19 @@ def show_dashboard():
     
 
     st.title("📊 Sales Dashboard and Reports")
-    st.caption(f"Welcome back, {st.session_state.username}")
+    st.markdown(
+        f"""
+        <div style="
+            font-size:24px;
+            font-weight: 700;
+            margin-top: -10px;
+            margin-bottom: 20px;
+        ">   
+          Welcome back, {st.session_state.branch_admin_name}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )      
     st.divider()
 
     st.subheader("🔍 Filter Options")

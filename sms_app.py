@@ -18,6 +18,12 @@ if "username" not in st.session_state:
 if "branch_id" not in st.session_state:
     st.session_state.branch_id = None
 
+if 'branch_admin_name' not in st.session_state:
+    st.session_state.branch_admin_name=''
+
+if 'branch_name' not in st.session_state:
+    st.session_state.branch_name =''    
+
 
 # ============================================================
 # PAGE CONFIG
@@ -89,6 +95,28 @@ if not st.session_state.logged_in:
                 st.session_state.branch_id = user[3]
                 st.session_state.role = user[4]
 
+                #get branch admin name
+                if user[4]=="Super Admin":
+                    st.session_state.branch_name = "All Branches"
+                    st.session_state.branch_admin_name="Super Admin"
+
+                else:
+                    cursor.execute(
+                        """
+                        SELECT branch_name, branch_admin_name
+                        FROM branches
+                        WHERE branch_id=%s
+                        """,
+                        (user[3],)
+                    )
+                    branch_data=cursor.fetchone()
+                    if branch_data:
+                        st.session_state.branch_name = branch_data[0]
+                        st.session_state.branch_admin_name = branch_data[1]
+                    else:
+                        st.session_state.branch_name = ''
+                        st.session_state.branch_admin_name=user[1]        
+
                 cursor.close()
                 conn.close()
 
@@ -123,8 +151,14 @@ with st.sidebar:
     st.markdown("<br>", unsafe_allow_html=True)
     st.divider()
 
-    st.write(f"🧑‍💻 **{st.session_state.username}**")
+    st.write(f"🏢 **{st.session_state.username}**")
     st.write(f"🔑 **{st.session_state.role}**")
+    if st.session_state.role == "Super Admin":
+        st.write("🌐 **All Branches**")
+        # st.write("🧑‍💻 **Super Admin**")
+    else:
+        # st.write(f"🏢 **{st.session_state.branch_name} **")
+        st.write(f"🧑‍💻 **{st.session_state.branch_admin_name}**")    
 
     st.markdown("<br>", unsafe_allow_html=True)
     st.divider()
@@ -135,6 +169,7 @@ with st.sidebar:
         st.session_state.role = ""
         st.session_state.username = ""
         st.session_state.branch_id = None
+        st.session_state.branch_admin_name=''
 
         st.rerun()
 
